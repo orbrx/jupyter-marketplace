@@ -64,6 +64,19 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
   const lastExtensionRef = useRef<HTMLDivElement | null>(null)
   const requestIdRef = useRef(0)
 
+  // Get sort label for announcements
+  const getSortLabel = (sortValue: string) => {
+    const sortOptions = [
+      { id: "new_and_rising", label: "New & Rising" },
+      { id: "download_count_month", label: "Popular This Month" },
+      { id: "download_count_total", label: "Most Downloaded" },
+      { id: "github_stars", label: "Most Stars" },
+      { id: "last_updated", label: "Recently Updated" },
+      { id: "name", label: "Name (A-Z)" },
+    ]
+    return sortOptions.find(option => option.id === sortValue)?.label || "Popular This Month"
+  }
+
   // Function to fetch extensions with pagination and filtering
   const fetchExtensions = useCallback(async (pageIndex: number, requestId: number) => {
     // Allow page 0 to proceed even if another request is running (we'll ignore stale responses)
@@ -158,12 +171,13 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
       // Only update total count when filters change (page 0)
       setTotalCount(count || 0)
       
-      // Announce search results
+      // Announce search results with sort information
       const totalFound = count || 0
+      const sortLabel = getSortLabel(sortBy)
       if (searchTerm) {
-        setAnnouncement(`Found ${totalFound} extension${totalFound !== 1 ? 's' : ''} matching "${searchTerm}"`)
+        setAnnouncement(`Found ${totalFound} extension${totalFound !== 1 ? 's' : ''} matching "${searchTerm}", sorted by ${sortLabel}`)
       } else {
-        setAnnouncement(`Loaded ${totalFound} extension${totalFound !== 1 ? 's' : ''}`)
+        setAnnouncement(`Loaded ${totalFound} extension${totalFound !== 1 ? 's' : ''}, sorted by ${sortLabel}`)
       }
     } else {
       // Merge with deduplication by id
@@ -243,7 +257,11 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
         {loading ? (
           <div className="h-7 md:h-6 w-60 md:w-52 bg-muted rounded skeleton-pulse" />
         ) : (
-          <h2 className="text-xl md:text-lg font-semibold">
+          <h2 
+            className="text-xl md:text-lg font-semibold"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {totalCount} Extension{totalCount !== 1 ? 's' : ''}
             {searchTerm && ` matching "${searchTerm}"`}
           </h2>
