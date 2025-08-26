@@ -89,15 +89,9 @@ pnpm dev
 
 ## Environment variables
 
-The Supabase database is **publicly accessible** for read-only operations. You can use the live database directly for development, or connect to it for data exploration and analysis:
+The Supabase database is **publicly accessible** for read-only operations. You can use the live database directly for development, or connect to it for data exploration and analysis. Read-only via RLS; heavy scraping may be throttled.
 
-Create `.env.local`:
-
-```bash
-# Public Supabase client (read-only access)
-NEXT_PUBLIC_SUPABASE_URL=https://mijujdykpaerevemuznw.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1panVqZHlrcGFlcmV2ZW11em53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2MzE1MTQsImV4cCI6MjA3MTIwNzUxNH0.5MuKbZsCEYGCqcRY9RFkwpHc1-o2G8V9ebR6WNrf5m0
-```
+Create `.env.local` (or copy from `.env.example`):
 
 ## How it works (frontend)
 
