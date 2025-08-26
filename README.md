@@ -1,4 +1,10 @@
-# JupyterLab Marketplace (Community Beta)
+<h1 align="center">
+  <a href="https://github.com/orbrx/jupyter-marketplace" target="_blank" rel="noopener noreferrer"><img src="./public/jupyter-marketplace-logo.png" alt="JupyterLab Marketplace logo" height="64" valign="middle"></a>
+  <span>JupyterLab Marketplace</span>
+</h1>
+<p align="center">
+  JupyterLab Extensions Catalog • Built by <img src="./public/orbrx.svg" alt="Orange Bricks" height="8" valign="middle"> Orange Bricks
+</p>
 
 A community-run marketplace for JupyterLab extensions. It surfaces real-world signals from PyPI (via BigQuery) and GitHub—stars, recent updates, and download trends—to make discovery less guessy.
 
