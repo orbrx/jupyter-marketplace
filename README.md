@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="./public/screenshot.png" alt="Screenshot of the site" width="800" />
+  <img src="./public/screenshot.png" alt="Homepage grid of JupyterLab Extensions Catalog (cards, search, sorts)" width="800" />
 </p>
 
 A community-run marketplace for JupyterLab extensions. It surfaces real-world signals from PyPI (via BigQuery) and GitHub—stars, recent updates, and download trends—to make discovery less guessy.
