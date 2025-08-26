@@ -16,6 +16,7 @@
 import { useRef } from "react"
 import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { DataFreshnessBadge } from "@/components/data-freshness-badge"
 
 interface MarketplaceSearchProps {
   searchTerm: string
@@ -25,7 +26,7 @@ interface MarketplaceSearchProps {
 export function MarketplaceSearch({ searchTerm, onSearchChange }: MarketplaceSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center justify-between space-x-4">
       <div className="relative flex-1 max-w-2xl">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 md:w-4 md:h-4" />
         <Input
@@ -49,6 +50,7 @@ export function MarketplaceSearch({ searchTerm, onSearchChange }: MarketplaceSea
           </button>
         )}
       </div>
+      <DataFreshnessBadge className="hidden md:block flex-shrink-0" />
     </div>
   )
 }
