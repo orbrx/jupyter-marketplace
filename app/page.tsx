@@ -28,7 +28,7 @@ import { BackToTop } from "@/components/back-to-top"
 export default function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState<string>("up_and_coming")
+  const [sortBy, setSortBy] = useState<string>("new_and_rising")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const router = useRouter()
   const pathname = usePathname()

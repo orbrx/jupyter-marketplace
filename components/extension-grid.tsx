@@ -89,7 +89,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
 
     // Apply sorting on server side (use secondary id order for stable pagination)
     switch (sortBy) {
-      case "up_and_coming":
+      case "new_and_rising":
         // For up and coming, we want:
         // 1. Recently updated extensions (within last 30 days)
         // 2. Lower download counts and stars (to exclude popular extensions)

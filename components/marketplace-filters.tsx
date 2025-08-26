@@ -27,7 +27,7 @@ export function MarketplaceFilters({
 }: MarketplaceFiltersProps) {
 
   const sortOptions = [
-    { id: "up_and_coming", label: "New & Rising" },
+    { id: "new_and_rising", label: "New & Rising" },
     { id: "download_count_month", label: "Popular This Month" },
     { id: "download_count_total", label: "Most Downloaded" },
     { id: "github_stars", label: "Most Stars" },
