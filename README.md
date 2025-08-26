@@ -6,6 +6,10 @@
   JupyterLab Extensions Catalog • Built by <img src="./public/orbrx.svg" alt="Orange Bricks" height="8" valign="middle"> Orange Bricks
 </p>
 
+<p align="center">
+  <img src="./public/screenshot.png" alt="Screenshot of the site" width="800" />
+</p>
+
 A community-run marketplace for JupyterLab extensions. It surfaces real-world signals from PyPI (via BigQuery) and GitHub—stars, recent updates, and download trends—to make discovery less guessy.
 
 Not affiliated with Project Jupyter. Built by Orange Bricks.
