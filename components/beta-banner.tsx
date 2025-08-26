@@ -72,11 +72,11 @@ export function BetaBanner({ feedbackHref = "#" }: { feedbackHref?: string }) {
           <span className="font-medium">Community beta</span>
           <span className="sm:hidden">
             {" "}—{" "}
-            <a href={feedbackHref} className="underline underline-offset-2 hover:no-underline font-medium">Feedback</a>
+            <a href={feedbackHref} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:no-underline font-medium">Feedback</a>
           </span>
           <span className="hidden sm:inline">
             . Not affiliated with Project Jupyter. Built by Orange Bricks. <span className="mx-1">→</span>
-            <a href={feedbackHref} className="underline underline-offset-2 hover:no-underline font-medium">Feedback</a>
+            <a href={feedbackHref} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:no-underline font-medium">Feedback</a>
           </span>
         </p>
         <button
