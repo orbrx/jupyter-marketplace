@@ -69,6 +69,10 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
     return count.toString()
   }
 
+  const formatNumberForScreenReader = (count: number) => {
+    return count.toLocaleString()
+  }
+
   const handleCardClick = () => {
     router.push(`/extensions/${extension.id}`)
   }
@@ -142,19 +146,25 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
           <div className="flex items-center justify-center space-x-2 md:space-x-1.5 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
               <Download className="w-3 h-3" />
-              <span>{formatNumber(extension.download_count_total)}</span>
+              <span aria-label={`${formatNumberForScreenReader(extension.download_count_total)} downloads`}>
+                {formatNumber(extension.download_count_total)}
+              </span>
             </div>
             {extension.github_stars > 0 && (
               <div className="flex items-center space-x-1">
                 <Star className="w-3 h-3" />
-                <span>{formatNumber(extension.github_stars)}</span>
+                <span aria-label={`${formatNumberForScreenReader(extension.github_stars)} stars`}>
+                  {formatNumber(extension.github_stars)}
+                </span>
               </div>
             )}
           </div>
           {showMonthlyDownloads && (
             <div className="flex items-center justify-center text-[10px] text-muted-foreground pb-0">
               <Download className="w-3 h-3 mr-1" />
-              <span>{formatNumber(extension.download_count_month)} this month</span>
+              <span aria-label={`${formatNumberForScreenReader(extension.download_count_month)} downloads this month`}>
+                {formatNumber(extension.download_count_month)} this month
+              </span>
             </div>
           )}
           {showUpdateTime && (
