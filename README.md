@@ -73,6 +73,12 @@ Third-party data (PyPI, GitHub) is used under their respective terms.
 - Thanks to the Jupyter community and maintainers of the many extensions featured here.
 - Hat tip to VS Code Marketplace for inspiration on UX patterns.
 
+## Support This Project
+
+If you find this marketplace useful, consider supporting covering our costs (BigQuery):
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/orbrx)
+
 ## Quick start (local dev)
 
 Prereqs: Node.js 18+, pnpm (or npm/yarn)
