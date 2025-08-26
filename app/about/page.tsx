@@ -95,7 +95,7 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
-                    Real-time download trends
+                    Download trends (7/30-day, nightly refresh)
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
