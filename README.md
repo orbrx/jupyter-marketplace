@@ -55,7 +55,7 @@ Removal/correction policy: if a listing is inaccurate or you want your package r
 
 ## License
 
-Code in this repository is licensed under Apache-2.0 (or MIT—pick one and update this line + LICENSE).
+Code in this repository is licensed under Apache-2.0.
 Third-party data (PyPI, GitHub) is used under their respective terms.
 
 ## Acknowledgements
