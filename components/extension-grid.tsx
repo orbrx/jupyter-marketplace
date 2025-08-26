@@ -59,6 +59,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const [announcement, setAnnouncement] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const loadingRef = useRef(false)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const lastExtensionRef = useRef<HTMLDivElement | null>(null)
@@ -151,6 +152,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
       console.error("Error fetching extensions:", error)
       // On error, only clear loading if this response is current
       if (requestId === requestIdRef.current) {
+        setError("Unable to load extensions. Please try again later.")
         setLoading(false)
       }
       loadingRef.current = false
@@ -231,6 +233,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
   useEffect(() => {
     setLoading(true)
     setExtensions([]) // Clear current extensions to show full skeleton
+    setError(null) // Clear any previous errors
     setPage(0)
     // Bump request id for new filters
     requestIdRef.current += 1
@@ -283,11 +286,39 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
           </div>
         ))}
       </div>
-      {extensions.length === 0 && !loading && (
+      {error && (
+        <div className="text-center py-8 md:py-12">
+          <p className="text-muted-foreground text-lg md:text-xl">Oops! Something went wrong</p>
+          <p className="text-muted-foreground text-sm md:text-base mt-2">
+            {error}
+          </p>
+          <p className="text-muted-foreground text-sm md:text-base mt-4">
+            Having trouble? <a 
+              href="https://github.com/orbrx/jupyter-marketplace/issues/new/choose" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium"
+            >
+              Let us know
+            </a> and we'll help fix it.
+          </p>
+        </div>
+      )}
+      {extensions.length === 0 && !loading && !error && (
         <div className="text-center py-8 md:py-12">
           <p className="text-muted-foreground text-lg md:text-xl">No extensions found</p>
           <p className="text-muted-foreground text-sm md:text-base mt-2">
             Try adjusting your search terms or filters
+          </p>
+          <p className="text-muted-foreground text-sm md:text-base mt-4">
+            Missing an extension? <a 
+              href="https://github.com/orbrx/jupyter-marketplace/issues/new/choose" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium"
+            >
+              Let us know
+            </a> and we'll add it to the catalog.
           </p>
         </div>
       )}
