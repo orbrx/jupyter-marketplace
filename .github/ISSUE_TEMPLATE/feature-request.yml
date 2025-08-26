@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest new features or improvements
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help you most?
+      placeholder: e.g., Conda-forge badge, Trending sort
+    validations:
+      required: true

@@ -1,0 +1,18 @@
+name: Data correction
+description: Fix stars/downloads/links/category for a package
+labels: ["data", "triage"]
+body:
+  - type: input
+    id: pkg
+    attributes:
+      label: Package name (PyPI)
+      placeholder: jupyterlab-git
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong?
+      placeholder: e.g., wrong GitHub repo mapped
+    validations:
+      required: true

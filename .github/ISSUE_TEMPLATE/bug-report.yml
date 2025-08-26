@@ -1,0 +1,11 @@
+name: Bug report
+description: Report crashes, layout issues, or API errors
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: What happened?
+      placeholder: Steps or URL
+    validations:
+      required: true
