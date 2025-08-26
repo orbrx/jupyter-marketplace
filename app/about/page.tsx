@@ -1,5 +1,6 @@
 import { MarketplaceHeader } from "@/components/marketplace-header"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 
 export default function AboutPage() {
   return (
@@ -20,13 +21,20 @@ export default function AboutPage() {
                 </p>
                 
                 <div className="border-t border-border pt-6">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <Image 
+                      src="/orbrx.svg" 
+                      alt="Orange Bricks Logo" 
+                      width={16} 
+                      height={16} 
+                      className="w-4 h-4 mr-2"
+                    />
                     Built by{" "}
                     <a 
                       href="https://orbrx.io?utm_source=jlmp&utm_medium=about_page&utm_campaign=attribution" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-1 underline-offset-2"
+                      className="font-semibold text-foreground hover:text-primary transition-colors underline decoration-1 underline-offset-2 ml-1"
                     >
                       Orange Bricks
                     </a>

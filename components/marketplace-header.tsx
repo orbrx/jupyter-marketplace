@@ -17,8 +17,8 @@ export function MarketplaceHeader() {
             <Link href="/" className="flex items-center space-x-2 md:space-x-3">
               <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
                 <Image 
-                  src="/orbrx.svg" 
-                  alt="Orbrx Logo" 
+                  src="/Squircle3-export.png" 
+                  alt="Jupyter Marketplace Logo" 
                   width={40} 
                   height={40} 
                   className="w-8 h-8 md:w-10 md:h-10"
