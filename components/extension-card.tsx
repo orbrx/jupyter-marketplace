@@ -17,7 +17,7 @@ import { Star, Download, Clock, Flag } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { formatRelativeTime } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import React from "react"
+import React, { forwardRef } from "react"
 
 interface Extension {
   id: number
@@ -48,7 +48,7 @@ interface ExtensionCardProps {
   showMonthlyDownloads?: boolean
 }
 
-export function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDownloads = false }: ExtensionCardProps) {
+export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDownloads = false }, ref) {
   const router = useRouter()
   
   const formatNumber = (count: number) => {
@@ -82,15 +82,36 @@ export function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDo
 
   return (
     <Card 
-      className="h-[280px] md:h-[250px] flex flex-col min-h-0 !gap-3 !py-3 md:!py-3 overflow-hidden hover:diagonal-shadow transition-shadow duration-150 cursor-pointer relative group"
+      ref={ref}
+      role="article"
+      aria-labelledby={`extension-${extension.id}-title`}
+      tabIndex={0}
+      className="h-[280px] md:h-[250px] flex flex-col min-h-0 !gap-3 !py-3 md:!py-3 overflow-hidden hover:diagonal-shadow transition-shadow duration-150 cursor-pointer relative group focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleCardClick()
+        }
+      }}
     >
       {/* Report button */}
       <button
         onClick={handleReportClick}
-        className="absolute top-2 right-2 p-1 rounded-md bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 z-10"
+        className="absolute top-2 right-2 p-1 rounded-md bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 z-10"
         title="Report issue with this package"
         aria-label="Report issue"
+        tabIndex={-1}
+        onFocus={(e) => {
+          // Make button visible when focused
+          e.currentTarget.style.opacity = '1'
+        }}
+        onBlur={(e) => {
+          // Hide button when focus leaves, unless parent is hovered
+          if (!e.currentTarget.closest('.group:hover')) {
+            e.currentTarget.style.opacity = '0'
+          }
+        }}
       >
         <Flag className="w-3 h-3" />
       </button>
@@ -108,7 +129,7 @@ export function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDo
             <span className="text-primary font-bold text-2xl md:text-xl">{extension.name.charAt(0).toUpperCase()}</span>
           )}
         </div>
-        <h3 className="font-semibold text-base md:text-base single-line-fade w-full leading-tight">{extension.name}</h3>
+        <h3 id={`extension-${extension.id}-title`} className="font-semibold text-base md:text-base single-line-fade w-full leading-tight">{extension.name}</h3>
         <p className="text-xs md:text-xs text-muted-foreground leading-tight single-line-fade w-full font-medium">{extension.author || "Unknown"}</p>
       </CardHeader>
 
@@ -146,4 +167,4 @@ export function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDo
       </CardContent>
     </Card>
   )
-}
+})

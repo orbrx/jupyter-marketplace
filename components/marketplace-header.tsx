@@ -70,6 +70,8 @@ export function MarketplaceHeader() {
               className="md:hidden p-2"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -96,7 +98,7 @@ export function MarketplaceHeader() {
       
       {/* Mobile dropdown menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card">
+        <div id="mobile-menu" className="md:hidden border-t border-border bg-card">
           <div className="container mx-auto px-4 py-3">
             <nav className="flex flex-col space-y-3">
               <Link 

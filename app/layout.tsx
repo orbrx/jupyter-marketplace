@@ -75,6 +75,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className={inter.className}>
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only fixed top-4 left-4 z-[100] bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium"
+        >
+          Skip to main content
+        </a>
         <BetaBanner feedbackHref="https://github.com/orbrx/jupyter-marketplace/issues/new/choose" />
         {children}
         <Analytics />

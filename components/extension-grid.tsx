@@ -19,6 +19,7 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { ExtensionCard } from "@/components/extension-card"
 import { createClient } from "@/lib/supabase"
 import { SkeletonExtensionCard } from "@/components/skeleton-card"
+import { LiveAnnouncer } from "@/components/live-announcer"
 
 interface Extension {
   id: number
@@ -57,6 +58,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
+  const [announcement, setAnnouncement] = useState("")
   const loadingRef = useRef(false)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const lastExtensionRef = useRef<HTMLDivElement | null>(null)
@@ -155,6 +157,14 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
       setExtensions(unique)
       // Only update total count when filters change (page 0)
       setTotalCount(count || 0)
+      
+      // Announce search results
+      const totalFound = count || 0
+      if (searchTerm) {
+        setAnnouncement(`Found ${totalFound} extension${totalFound !== 1 ? 's' : ''} matching "${searchTerm}"`)
+      } else {
+        setAnnouncement(`Loaded ${totalFound} extension${totalFound !== 1 ? 's' : ''}`)
+      }
     } else {
       // Merge with deduplication by id
       setExtensions(prev => {
@@ -164,6 +174,11 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
         }
         return Array.from(byId.values())
       })
+      
+      // Announce more items loaded
+      if (newItems.length > 0) {
+        setAnnouncement(`Loaded ${newItems.length} more extensions`)
+      }
     }
     setHasMore(count ? (pageIndex + 1) * EXTENSIONS_PER_PAGE < count : false)
 
@@ -223,6 +238,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
 
   return (
     <div>
+      <LiveAnnouncer message={announcement} />
       <div className="flex items-center justify-between mb-4 md:mb-6">
         {loading ? (
           <div className="h-7 md:h-6 w-60 md:w-52 bg-muted rounded skeleton-pulse" />
@@ -235,16 +251,13 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         {extensions.map((extension, index) => (
-          <div
+          <ExtensionCard 
             key={extension.id}
             ref={index === extensions.length - 1 ? lastExtensionRef : null}
-          >
-            <ExtensionCard 
-              extension={extension}
-              showUpdateTime={sortBy === "last_updated"}
-              showMonthlyDownloads={sortBy === "download_count_month"}
-            />
-          </div>
+            extension={extension}
+            showUpdateTime={sortBy === "last_updated"}
+            showMonthlyDownloads={sortBy === "download_count_month"}
+          />
         ))}
         {loading && Array.from({ length: 15 }).map((_, i) => (
           <div key={`skeleton-${i}`}>

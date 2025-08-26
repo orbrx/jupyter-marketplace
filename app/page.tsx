@@ -123,7 +123,7 @@ export default function MarketplacePage() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 md:px-6 py-6">
+      <main id="main-content" className="container mx-auto px-4 md:px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sticky Filters Sidebar */}
           <aside className="w-full lg:w-64 lg:flex-shrink-0">
