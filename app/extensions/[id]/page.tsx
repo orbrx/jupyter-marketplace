@@ -24,6 +24,20 @@ import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
+import rehypeSanitize from "rehype-sanitize"
+
+// Preprocess markdown to handle HTML comments and improve GitHub compatibility
+function preprocessMarkdown(markdown: string): string {
+  return markdown
+    // Remove HTML comments (including Jekyll/Liquid comments)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    // Remove Jekyll/Liquid template tags
+    .replace(/\{\%[\s\S]*?\%\}/g, '')
+    // Clean up extra whitespace left by removed comments
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .trim()
+}
 
 interface Extension {
   id: number
@@ -275,19 +289,54 @@ export default function ExtensionDetailPage() {
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
                     components={{
                       // Override default styling for certain elements
-                      p: ({node, ...props}) => <p className="text-muted-foreground leading-relaxed" {...props} />,
-                      a: ({node, ...props}) => <a className="text-primary hover:text-primary/80" {...props} />,
-                      code: ({node, className, ...props}) => 
-                        className?.includes('language-') ? (
-                          <code className="block bg-muted p-4 rounded-lg text-sm overflow-x-auto" {...props} />
+                      p: ({node, ...props}) => <p className="text-muted-foreground leading-relaxed mb-4" {...props} />,
+                      a: ({node, ...props}) => <a className="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                      h1: ({node, ...props}) => <h1 className="text-3xl font-bold mb-4 mt-8 text-foreground" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="text-2xl font-semibold mb-3 mt-6 text-foreground" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="text-xl font-semibold mb-2 mt-4 text-foreground" {...props} />,
+                      h4: ({node, ...props}) => <h4 className="text-lg font-medium mb-2 mt-3 text-foreground" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
+                      li: ({node, ...props}) => <li className="text-muted-foreground" {...props} />,
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/20 pl-4 italic text-muted-foreground mb-4" {...props} />,
+                      img: ({node, ...props}) => (
+                        <img 
+                          className="max-w-full h-auto rounded-lg shadow-sm mb-4" 
+                          loading="lazy"
+                          {...props} 
+                        />
+                      ),
+                      code: ({node, className, children, ...props}) => {
+                        const isInline = !className?.includes('language-')
+                        return isInline ? (
+                          <code className="bg-muted px-1.5 py-0.5 rounded-sm text-sm font-mono" {...props}>
+                            {children}
+                          </code>
                         ) : (
-                          <code className="bg-muted px-1.5 py-0.5 rounded-sm text-sm" {...props} />
+                          <div className="mb-4">
+                            <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                              <code className="text-sm font-mono" {...props}>
+                                {children}
+                              </code>
+                            </pre>
+                          </div>
                         )
+                      },
+                      pre: ({node, children, ...props}) => <div>{children}</div>, // Prevent double wrapping with code component
+                      table: ({node, ...props}) => (
+                        <div className="overflow-x-auto mb-4">
+                          <table className="min-w-full border-collapse border border-border" {...props} />
+                        </div>
+                      ),
+                      th: ({node, ...props}) => <th className="border border-border px-4 py-2 bg-muted font-semibold text-left" {...props} />,
+                      td: ({node, ...props}) => <td className="border border-border px-4 py-2" {...props} />,
+                      hr: ({node, ...props}) => <hr className="border-border my-6" {...props} />
                     }}
                   >
-                    {extension.description || "No description available for this extension."}
+                    {preprocessMarkdown(extension.description || "No description available for this extension.")}
                   </ReactMarkdown>
                 </div>
               </CardContent>
