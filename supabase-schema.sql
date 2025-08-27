@@ -28,3 +28,23 @@ ALTER TABLE public.extensions ENABLE ROW LEVEL SECURITY;
 -- Create a policy that allows anyone to read extensions data
 CREATE POLICY "Anyone can read extensions" ON public.extensions
   FOR SELECT USING (true);
+
+-- Function to automatically update the last_updated timestamp
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    NEW.last_updated = NOW();
+    RETURN NEW;
+END;
+$$;
+
+-- Trigger to automatically update last_updated when a row is modified
+DROP TRIGGER IF EXISTS update_extensions_updated_at ON public.extensions;
+CREATE TRIGGER update_extensions_updated_at
+    BEFORE UPDATE ON public.extensions
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
