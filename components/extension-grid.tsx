@@ -168,7 +168,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
     const newItems = data || []
     if (pageIndex === 0) {
       // Ensure uniqueness on initial page
-      const unique = Array.from(new Map(newItems.map(e => [e.id, e])).values())
+      const unique = Array.from(new Map(newItems.map(e => [e.name, e])).values())
       setExtensions(unique)
       // Only update total count when filters change (page 0)
       setTotalCount(count || 0)
@@ -182,13 +182,13 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
         setAnnouncement(`Loaded ${totalFound} extension${totalFound !== 1 ? 's' : ''}, sorted by ${sortLabel}`)
       }
     } else {
-      // Merge with deduplication by id
+      // Merge with deduplication by name
       setExtensions(prev => {
-        const byId = new Map<number, Extension>(prev.map(e => [e.id, e]))
+        const byName = new Map<string, Extension>(prev.map(e => [e.name, e]))
         for (const item of newItems) {
-          byId.set(item.id, item)
+          byName.set(item.name, item)
         }
-        return Array.from(byId.values())
+        return Array.from(byName.values())
       })
       
       // Announce more items loaded
@@ -273,7 +273,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         {extensions.map((extension, index) => (
           <ExtensionCard 
-            key={extension.id}
+            key={extension.name}
             ref={index === extensions.length - 1 ? lastExtensionRef : null}
             extension={extension}
             showUpdateTime={sortBy === "last_updated"}

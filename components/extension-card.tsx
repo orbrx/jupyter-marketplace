@@ -74,13 +74,13 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
   const handleReportClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation() // Prevent card click
-    const reportUrl = `https://github.com/orbrx/jupyter-marketplace/issues/new?template=data-correction.yml&title=[data]%20${encodeURIComponent(extension.name)}&labels=data,triage&pkg=${encodeURIComponent(extension.name)}&what=${encodeURIComponent(`URL: ${window.location.origin}/extensions/${extension.id}`)}`
+    const reportUrl = `https://github.com/orbrx/jupyter-marketplace/issues/new?template=data-correction.yml&title=[data]%20${encodeURIComponent(extension.name)}&labels=data,triage&pkg=${encodeURIComponent(extension.name)}&what=${encodeURIComponent(`URL: ${window.location.origin}/extensions/${extension.name}`)}`
     window.open(reportUrl, '_blank', 'noopener,noreferrer')
   }
 
   return (
     <Link 
-      href={`/extensions/${extension.id}`}
+      href={`/extensions/${extension.name}`}
       className="block h-[280px] md:h-[250px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
     >
       <Card 

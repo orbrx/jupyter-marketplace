@@ -96,7 +96,7 @@ export default function ExtensionDetailPage() {
       const { data, error } = await supabase
         .from("extensions")
         .select("*")
-        .eq("id", params.id)
+        .eq("name", params.id)
         .single()
 
       if (error) {
@@ -429,7 +429,7 @@ export default function ExtensionDetailPage() {
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
-                    const reportUrl = `https://github.com/orbrx/jupyter-marketplace/issues/new?template=data-correction.yml&title=[data]%20${encodeURIComponent(extension.name)}&labels=data,triage&pkg=${encodeURIComponent(extension.name)}&what=${encodeURIComponent(`URL: ${window.location.origin}/extensions/${extension.id}`)}`
+                    const reportUrl = `https://github.com/orbrx/jupyter-marketplace/issues/new?template=data-correction.yml&title=[data]%20${encodeURIComponent(extension.name)}&labels=data,triage&pkg=${encodeURIComponent(extension.name)}&what=${encodeURIComponent(`URL: ${window.location.origin}/extensions/${extension.name}`)}`
                     window.open(reportUrl, '_blank', 'noopener,noreferrer')
                   }}
                 >
