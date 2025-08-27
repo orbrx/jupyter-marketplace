@@ -16,7 +16,7 @@
 import { Star, Download, Clock, Flag } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { formatRelativeTime } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import React, { forwardRef } from "react"
 
 interface Extension {
@@ -49,8 +49,6 @@ interface ExtensionCardProps {
 }
 
 export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDownloads = false }, ref) {
-  const router = useRouter()
-  
   const formatNumber = (count: number) => {
     if (count >= 1000000) {
       const millions = count / 1000000
@@ -73,10 +71,6 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
     return count.toLocaleString()
   }
 
-  const handleCardClick = () => {
-    router.push(`/extensions/${extension.id}`)
-  }
-
   const handleReportClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation() // Prevent card click
@@ -85,20 +79,16 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
   }
 
   return (
-    <Card 
-      ref={ref}
-      role="article"
-      aria-labelledby={`extension-${extension.id}-title`}
-      tabIndex={0}
-      className="h-[280px] md:h-[250px] flex flex-col min-h-0 !gap-3 !py-3 md:!py-3 overflow-hidden hover:diagonal-shadow transition-shadow duration-150 cursor-pointer relative group focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-      onClick={handleCardClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleCardClick()
-        }
-      }}
+    <Link 
+      href={`/extensions/${extension.id}`}
+      className="block h-[280px] md:h-[250px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
     >
+      <Card 
+        ref={ref}
+        role="article"
+        aria-labelledby={`extension-${extension.id}-title`}
+        className="h-full flex flex-col min-h-0 !gap-3 !py-3 md:!py-3 overflow-hidden hover:diagonal-shadow transition-shadow duration-150 relative group-hover:diagonal-shadow group-focus-visible:diagonal-shadow"
+      >
       {/* Report button */}
       <button
         onClick={handleReportClick}
@@ -176,5 +166,6 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
         </div>
       </CardContent>
     </Card>
+    </Link>
   )
 })
