@@ -60,7 +60,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold text-foreground mb-4">
@@ -105,6 +105,75 @@ export default function AboutPage() {
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardContent className="p-6 md:p-8">
+              <h2 className="text-2xl font-semibold text-foreground mb-6">
+                How to Add Your Extension
+              </h2>
+              <div className="prose prose-gray dark:prose-invert max-w-none">
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  Getting your JupyterLab extension listed in this marketplace is simple—no need to contact us! Just publish your extension on PyPI with the correct Trove classifier, and it will appear in our catalog on the same day.
+                </p>
+                
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">
+                  Publishing Steps
+                </h3>
+                <ol className="space-y-2 text-muted-foreground list-decimal list-inside">
+                  <li>Ensure your extension includes the proper Trove classifier (e.g., <code className="text-sm bg-muted px-1 py-0.5 rounded">Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt</code>) in your <code className="text-sm bg-muted px-1 py-0.5 rounded">setup.py</code> or <code className="text-sm bg-muted px-1 py-0.5 rounded">pyproject.toml</code></li>
+                  <li>Publish your package to PyPI using standard Python packaging tools</li>
+                  <li>Your extension will automatically appear in our catalog within 24 hours</li>
+                </ol>
+                
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>📚 Learn More:</strong> For comprehensive information about JupyterLab extensions, Trove classifiers, and development guidelines, see the{" "}
+                    <a 
+                      href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline hover:no-underline font-medium"
+                    >
+                      official JupyterLab extensions documentation
+                    </a>
+                    .
+                  </p>
+                </div>
+                
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">
+                  Need Help Getting Started?
+                </h3>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  We provide a{" "}
+                  <a 
+                    href="https://github.com/orbrx/extension-template-cursor?utm_source=jlmp&utm_medium=about_page&utm_campaign=dev_onramp" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    new extension template with AI assistant instructions
+                  </a>
+                  , making it easy to go from your idea to publishing. The template includes everything you need to scaffold a modern JupyterLab extension.
+                </p>
+                
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">
+                  Extension Missing?
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  If you're a maintainer and your extension is missing from our catalog, please{" "}
+                  <a 
+                    href="https://github.com/orbrx/jupyter-marketplace/issues/new/choose" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    send us feedback using GitHub issues
+                  </a>
+                  . We'll help troubleshoot and ensure your extension gets properly indexed.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
