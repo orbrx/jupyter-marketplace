@@ -37,9 +37,9 @@ export const metadata: Metadata = {
   description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub. Discover extensions with download trends, GitHub stars, and confidence metrics.',
   metadataBase: new URL('https://marketplace.orbrx.io'),
   icons: {
-    icon: '/orbrx.png',
-    shortcut: '/orbrx.png',
-    apple: '/orbrx.png',
+    icon: '/jupyter-marketplace-logo.png',
+    shortcut: '/jupyter-marketplace-logo.png',
+    apple: '/jupyter-marketplace-logo.png',
   },
   openGraph: {
     title: 'JupyterLab Marketplace',
