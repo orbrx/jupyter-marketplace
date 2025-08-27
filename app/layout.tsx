@@ -34,7 +34,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'JupyterLab Marketplace',
-  description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub',
+  description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub. Discover extensions with download trends, GitHub stars, and confidence metrics.',
   metadataBase: new URL('https://marketplace.orbrx.io'),
   icons: {
     icon: '/orbrx.png',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'JupyterLab Marketplace',
-    description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub',
+    description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub. Discover extensions with download trends, GitHub stars, and confidence metrics.',
     type: 'website',
     images: [
       {
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'JupyterLab Marketplace',
-    description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub',
+    description: 'Community-run marketplace for JupyterLab extensions with real-world signals from PyPI and GitHub. Discover extensions with download trends, GitHub stars, and confidence metrics.',
     images: ['/og.png'],
   },
 }
