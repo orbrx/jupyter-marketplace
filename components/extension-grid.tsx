@@ -32,6 +32,7 @@ interface Extension {
   download_count_month: number
   download_count_total: number
   last_updated: string
+  jupyterlab_versions?: number[]
   // Optional fields that we don't fetch initially for performance
   summary?: string | null
   version?: string
@@ -48,11 +49,12 @@ interface ExtensionGridProps {
   searchTerm: string
   selectedCategory: string
   sortBy: string
+  selectedVersion: string
 }
 
 const EXTENSIONS_PER_PAGE = 50
 
-export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: ExtensionGridProps) {
+export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVersion }: ExtensionGridProps) {
   const [extensions, setExtensions] = useState<Extension[]>([])
   const [loading, setLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
@@ -99,6 +101,12 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
     // Apply search filter on server side
     if (searchTerm) {
       query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%`)
+    }
+
+    // Apply JupyterLab version filter on server side
+    if (selectedVersion && selectedVersion !== "all") {
+      const versionNum = parseInt(selectedVersion)
+      query = query.contains("jupyterlab_versions", [versionNum])
     }
 
     // Apply sorting on server side (use secondary id order for stable pagination)
@@ -150,9 +158,18 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
 
     if (error) {
       console.error("Error fetching extensions:", error)
+      
+      // Check if error is related to jupyterlab_versions column
+      const errorMessage = error.message || ''
+      const isVersionColumnError = errorMessage.includes('jupyterlab_versions') || errorMessage.includes('column')
+      
       // On error, only clear loading if this response is current
       if (requestId === requestIdRef.current) {
-        setError("Unable to load extensions. Please try again later.")
+        if (isVersionColumnError) {
+          setError("Database schema mismatch. The jupyterlab_versions column may not exist in your database. Please run the migration or set version filter to 'All Versions'.")
+        } else {
+          setError("Unable to load extensions. Please try again later.")
+        }
         setLoading(false)
       }
       loadingRef.current = false
@@ -200,7 +217,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
 
     setLoading(false)
     loadingRef.current = false
-  }, [searchTerm, selectedCategory, sortBy])
+  }, [searchTerm, selectedCategory, sortBy, selectedVersion])
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -244,7 +261,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy }: Extensio
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [searchTerm, selectedCategory, sortBy, fetchExtensions])
+  }, [searchTerm, selectedCategory, sortBy, selectedVersion, fetchExtensions])
 
   // Fetch more data when page changes
   useEffect(() => {

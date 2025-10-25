@@ -29,6 +29,7 @@ export default function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<string>("new_and_rising")
+  const [selectedVersion, setSelectedVersion] = useState<string>("all")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const router = useRouter()
   const pathname = usePathname()
@@ -39,11 +40,16 @@ export default function MarketplacePage() {
     if (typeof window !== 'undefined') {
       const urlSort = searchParams.get("sort")
       const urlQ = searchParams.get("q")
+      const urlVersion = searchParams.get("version")
       const savedSortBy = localStorage.getItem("sortBy")
+      const savedVersion = localStorage.getItem("selectedVersion")
 
       // Prefer URL params; fall back to localStorage; then defaults
       if (urlSort) setSortBy(urlSort)
       else if (savedSortBy) setSortBy(savedSortBy)
+
+      if (urlVersion) setSelectedVersion(urlVersion)
+      else if (savedVersion) setSelectedVersion(savedVersion)
 
       if (urlQ) setSearchTerm(urlQ)
 
@@ -60,11 +66,12 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     localStorage.setItem("sortBy", sortBy)
+    localStorage.setItem("selectedVersion", selectedVersion)
     // Scroll to top when filter changes (but not on initial load)
     if (typeof window !== 'undefined' && !isLoading) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [sortBy, isLoading])
+  }, [sortBy, selectedVersion, isLoading])
 
   // Keep URL in sync with current filters (avoid pushing history on every change)
   useEffect(() => {
@@ -72,9 +79,10 @@ export default function MarketplacePage() {
     const params = new URLSearchParams()
     if (debouncedSearch) params.set("q", debouncedSearch)
     if (sortBy) params.set("sort", sortBy)
+    if (selectedVersion) params.set("version", selectedVersion)
     const qs = params.toString()
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-  }, [debouncedSearch, sortBy, pathname, router])
+  }, [debouncedSearch, sortBy, selectedVersion, pathname, router])
 
   if (isLoading) {
     return (
@@ -131,6 +139,8 @@ export default function MarketplacePage() {
               <MarketplaceFilters 
                 sortBy={sortBy}
                 onSortChange={setSortBy}
+                selectedVersion={selectedVersion}
+                onVersionChange={setSelectedVersion}
               />
             </div>
           </aside>
@@ -139,6 +149,7 @@ export default function MarketplacePage() {
               searchTerm={debouncedSearch}
               selectedCategory=""
               sortBy={sortBy}
+              selectedVersion={selectedVersion}
             />
           </div>
         </div>

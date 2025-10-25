@@ -59,6 +59,7 @@ interface Extension {
   download_count_week: number
   download_count_day: number
   last_updated: string
+  jupyterlab_versions: number[]
 }
 
 function InstallCommand({ name }: { name: string }) {
@@ -109,7 +110,7 @@ export default function ExtensionDetailPage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from("extensions")
-        .select("*")
+        .select("*, jupyterlab_versions")
         .eq("name", params.id)
         .single()
 
@@ -357,6 +358,18 @@ export default function ExtensionDetailPage() {
                     <p className="text-sm text-muted-foreground">{formatDate(extension.last_updated)}</p>
                   </div>
                 </div>
+                {extension.jupyterlab_versions && extension.jupyterlab_versions.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm font-medium mb-2">Supported JupyterLab Versions</p>
+                    <div className="flex flex-wrap gap-2">
+                      {extension.jupyterlab_versions.sort((a, b) => b - a).map((version) => (
+                        <Badge key={version} variant="secondary" className="text-sm">
+                          JupyterLab {version}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {extension.license && (
                   <div className="mt-4 pt-4 border-t">
                     <div className="grid grid-cols-[auto,1fr] items-start gap-2">

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.extensions (
   download_count_month INTEGER DEFAULT 0,
   download_count_week INTEGER DEFAULT 0,
   download_count_day INTEGER DEFAULT 0,
+  jupyterlab_versions INTEGER[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -48,3 +49,7 @@ CREATE TRIGGER update_extensions_updated_at
     BEFORE UPDATE ON public.extensions
     FOR EACH ROW
     EXECUTE FUNCTION public.update_updated_at_column();
+
+-- Create GIN index for efficient array queries on jupyterlab_versions
+CREATE INDEX IF NOT EXISTS idx_extensions_jupyterlab_versions 
+  ON public.extensions USING GIN (jupyterlab_versions);
