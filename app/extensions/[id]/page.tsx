@@ -26,6 +26,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import rehypeSanitize from "rehype-sanitize"
+import { BadgeConfigurator } from "@/components/badge-configurator"
 
 // Preprocess markdown to handle HTML comments and improve GitHub compatibility
 function preprocessMarkdown(markdown: string): string {
@@ -500,6 +501,9 @@ export default function ExtensionDetailPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Badge Configurator */}
+            <BadgeConfigurator extensionName={extension.name} />
           </div>
         </div>
       </div>
