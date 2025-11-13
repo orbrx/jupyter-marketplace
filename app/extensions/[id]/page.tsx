@@ -269,6 +269,17 @@ export default function ExtensionDetailPage() {
         {/* Install Command + Actions */}
         <div className="flex flex-wrap items-center gap-4 mb-8">
           <InstallCommand name={extension.name} />
+          <a 
+            href={`https://codespaces.new/orbrx/try-labextensions/tree/${extension.name}?quickstart=1&editor=jupyter`}
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <img 
+              src="https://github.com/codespaces/badge.svg" 
+              alt="Open in GitHub Codespaces" 
+              className="h-10"
+            />
+          </a>
           {extension.github_url && (
             <Button variant="outline" size="lg" asChild>
               <a href={extension.github_url} target="_blank" rel="noopener noreferrer">
