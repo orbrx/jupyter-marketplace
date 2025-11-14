@@ -280,6 +280,17 @@ export default function ExtensionDetailPage() {
               className="h-10"
             />
           </a>
+          <a 
+            href={`https://mybinder.org/v2/gh/orbrx/try-labextensions/${extension.name}?urlpath=lab`}
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <img 
+              src="https://mybinder.org/badge_logo.svg" 
+              alt="Launch in Binder" 
+              className="h-10"
+            />
+          </a>
           {extension.github_url && (
             <Button variant="outline" size="lg" asChild>
               <a href={extension.github_url} target="_blank" rel="noopener noreferrer">
