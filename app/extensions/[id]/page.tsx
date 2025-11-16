@@ -61,6 +61,9 @@ interface Extension {
   download_count_day: number
   last_updated: string
   jupyterlab_versions: number[]
+  downloads_trend_365d: { week: string; downloads: number }[] | null
+  download_trend_30d_pct: number | null
+  download_trend_direction: "up" | "down" | "stable" | null
 }
 
 function InstallCommand({ name }: { name: string }) {
@@ -111,7 +114,7 @@ export default function ExtensionDetailPage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from("extensions")
-        .select("*, jupyterlab_versions")
+        .select("*, jupyterlab_versions, downloads_trend_365d, download_trend_30d_pct, download_trend_direction")
         .eq("name", params.id)
         .single()
 
@@ -128,6 +131,41 @@ export default function ExtensionDetailPage() {
 
   const formatNumber = (count: number) => {
     return count.toLocaleString()
+  }
+
+  const formatTrendBadge = () => {
+    if (extension?.download_trend_30d_pct == null || extension.download_trend_direction == null) {
+      return null
+    }
+
+    const pct = extension.download_trend_30d_pct
+    const rounded = Math.round(pct)
+    const formattedPct = `${rounded > 0 ? "+" : ""}${rounded}%`
+
+    let label = ""
+    let className = "px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center gap-1"
+
+    if (extension.download_trend_direction === "up") {
+      if (pct >= 100) {
+        label = `🔥 Hot · ${formattedPct}`
+        className += " bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200"
+      } else {
+        label = `▲ Growing · ${formattedPct}`
+        className += " bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+      }
+    } else if (extension.download_trend_direction === "stable") {
+      label = `→ Stable · ${formattedPct}`
+      className += " bg-muted text-muted-foreground"
+    } else {
+      label = `▼ Declining · ${formattedPct}`
+      className += " bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+    }
+
+    return (
+      <span className={className} aria-label={`Download trend over last 30 days: ${label}`}>
+        {label}
+      </span>
+    )
   }
 
   const getCategoryColor = (category: string | null) => {
@@ -449,6 +487,92 @@ export default function ExtensionDetailPage() {
                   </div>
                   <span className="font-medium">{formatNumber(extension.download_count_day)}</span>
                 </div>
+                {extension.download_trend_30d_pct != null && (
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <Download className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">30-day Trend</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Based on downloads in the last 30 days vs the previous 30 days.
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {formatTrendBadge()}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Download Trend Over Time */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Download Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {extension.downloads_trend_365d && extension.downloads_trend_365d.length > 1 ? (
+                  <div className="space-y-3">
+                    <div className="h-32 w-full">
+                      <svg viewBox="0 0 100 40" className="w-full h-full">
+                        {(() => {
+                          const points = extension.downloads_trend_365d || []
+                          const values = points.map(p => p.downloads)
+                          const min = Math.min(...values)
+                          const max = Math.max(...values)
+                          const range = max - min || 1
+                          const n = points.length
+                          const coords = points.map((p, i) => {
+                            const x = (i / (n - 1)) * 90 + 5 // leave padding for y labels
+                            const y = 35 - ((p.downloads - min) / range) * 25 // top padding and x-axis at ~35
+                            return { x, y }
+                          })
+                          const pathD = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x},${c.y}`).join(" ")
+                          const areaD = `${pathD} L95,35 L5,35 Z`
+
+                          const minLabel = min.toLocaleString()
+                          const maxLabel = max.toLocaleString()
+
+                          return (
+                            <>
+                              {/* Area and line */}
+                              <path d={areaD} className="fill-primary/10" />
+                              <path d={pathD} className="stroke-primary" fill="none" strokeWidth={1.5} />
+
+                              {/* X axis baseline */}
+                              <line x1={5} y1={35} x2={95} y2={35} className="stroke-muted-foreground/40" strokeWidth={0.3} />
+
+                              {/* Y axis min/max labels */}
+                              <text x={3} y={35} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
+                                {minLabel}
+                              </text>
+                              <text x={3} y={12} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
+                                {maxLabel}
+                              </text>
+
+                              {/* X axis labels: 12 mo, 6 mo, Now */}
+                              <text x={5} y={38} textAnchor="start" className="fill-muted-foreground" fontSize={3}>
+                                12 mo
+                              </text>
+                              <text x={50} y={38} textAnchor="middle" className="fill-muted-foreground" fontSize={3}>
+                                6 mo
+                              </text>
+                              <text x={95} y={38} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
+                                Now
+                              </text>
+                            </>
+                          )
+                        })()}
+                      </svg>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Weekly downloads over the last year. Higher areas indicate more downloads.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Trend data is not available yet for this extension.</p>
+                )}
               </CardContent>
             </Card>
 

@@ -32,6 +32,7 @@ export function MarketplaceFilters({
 
   const sortOptions = [
     { id: "new_and_rising", label: "New & Rising" },
+    { id: "trending", label: "Trending This Month" },
     { id: "download_count_month", label: "Popular This Month" },
     { id: "download_count_total", label: "Most Downloaded" },
     { id: "github_stars", label: "Most Stars" },

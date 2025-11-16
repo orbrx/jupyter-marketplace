@@ -43,6 +43,8 @@ interface Extension {
   github_issues?: number
   download_count_week?: number
   download_count_day?: number
+  download_trend_30d_pct?: number | null
+  download_trend_direction?: "up" | "down" | "stable" | null
 }
 
 interface ExtensionGridProps {
@@ -71,6 +73,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
   const getSortLabel = (sortValue: string) => {
     const sortOptions = [
       { id: "new_and_rising", label: "New & Rising" },
+      { id: "trending", label: "Trending This Month" },
       { id: "download_count_month", label: "Popular This Month" },
       { id: "download_count_total", label: "Most Downloaded" },
       { id: "github_stars", label: "Most Stars" },
@@ -90,7 +93,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     const supabase = createClient()
     let query = supabase
       .from("extensions")
-      .select("id, name, description, summary, author, category, logo_url, github_stars, download_count_month, download_count_total, last_updated", { count: "exact" })
+      .select("id, name, description, summary, author, category, logo_url, github_stars, download_count_month, download_count_total, last_updated, download_trend_30d_pct, download_trend_direction", { count: "exact" })
       .range(pageIndex * EXTENSIONS_PER_PAGE, (pageIndex + 1) * EXTENSIONS_PER_PAGE - 1)
 
     // Apply category filter on server side
@@ -115,12 +118,21 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
         // For up and coming, we want:
         // 1. Recently updated extensions (within last 30 days)
         // 2. Lower download counts and stars (to exclude popular extensions)
-        // 3. Order by update date to show newest first
+        // 3. Actually rising (positive growth trend)
+        // 4. Order by growth percentage to show fastest risers first
         query = query
           .gte('last_updated', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
           .lt('download_count_total', 10000) // Exclude very popular extensions
           .lt('github_stars', 100) // Exclude extensions with lots of stars
-          .order('last_updated', { ascending: false })
+          .eq('download_trend_direction', 'up') // Must be rising
+          .order('download_trend_30d_pct', { ascending: false }) // Fastest growers first
+          .order('id', { ascending: true })
+        break
+      case "trending":
+        // Extensions currently trending up, ordered by 30d growth
+        query = query
+          .eq('download_trend_direction', 'up')
+          .order('download_trend_30d_pct', { ascending: false })
           .order('id', { ascending: true })
         break
       case "download_count_month":
@@ -295,6 +307,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
             extension={extension}
             showUpdateTime={sortBy === "last_updated"}
             showMonthlyDownloads={sortBy === "download_count_month"}
+            showTrendBadge={sortBy === "new_and_rising" || sortBy === "trending"}
           />
         ))}
         {loading && Array.from({ length: 15 }).map((_, i) => (

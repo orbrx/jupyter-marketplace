@@ -40,15 +40,18 @@ interface Extension {
   github_issues?: number
   download_count_week?: number
   download_count_day?: number
+  download_trend_30d_pct?: number | null
+  download_trend_direction?: "up" | "down" | "stable" | null
 }
 
 interface ExtensionCardProps {
   extension: Extension
   showUpdateTime?: boolean
   showMonthlyDownloads?: boolean
+  showTrendBadge?: boolean
 }
 
-export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDownloads = false }, ref) {
+export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(function ExtensionCard({ extension, showUpdateTime = false, showMonthlyDownloads = false, showTrendBadge = false }, ref) {
   const formatNumber = (count: number) => {
     if (count >= 1000000) {
       const millions = count / 1000000
@@ -69,6 +72,46 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
 
   const formatNumberForScreenReader = (count: number) => {
     return count.toLocaleString()
+  }
+
+  const renderTrendBadge = () => {
+    if (extension.download_trend_30d_pct == null || extension.download_trend_direction == null) {
+      return null
+    }
+
+    const pct = extension.download_trend_30d_pct
+    const rounded = Math.round(pct)
+    const formattedPct = `${rounded > 0 ? "+" : ""}${rounded}%`
+
+    let label = ""
+    let className = "px-1.5 py-0.5 rounded-full text-[10px] font-medium inline-flex items-center gap-1"
+    let ariaLabel = ""
+
+    if (extension.download_trend_direction === "up") {
+      if (pct >= 100) {
+        label = `🔥 ${formattedPct}`
+        className += " bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200"
+        ariaLabel = `Downloads up ${formattedPct} in the last 30 days (hot)`
+      } else {
+        label = `📈 ${formattedPct}`
+        className += " bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+        ariaLabel = `Downloads up ${formattedPct} in the last 30 days`
+      }
+    } else if (extension.download_trend_direction === "stable") {
+      label = `→ ${formattedPct}`
+      className += " bg-muted text-muted-foreground"
+      ariaLabel = `Downloads stable over the last 30 days (${formattedPct})`
+    } else {
+      label = `📉 ${formattedPct}`
+      className += " bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+      ariaLabel = `Downloads down ${formattedPct} in the last 30 days`
+    }
+
+    return (
+      <span className={className} aria-label={ariaLabel}>
+        {label}
+      </span>
+    )
   }
 
   const handleReportClick = (e: React.MouseEvent) => {
@@ -131,7 +174,6 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
         <p className="text-xs md:text-xs text-muted-foreground line-clamp-fade-right-3 text-center leading-snug break-words">
           {extension.summary || "No summary available."}
         </p>
-        
         <div className="space-y-2 mt-auto">
           <div className="flex items-center justify-center space-x-2 md:space-x-1.5 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
@@ -155,6 +197,11 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
               <span aria-label={`${formatNumberForScreenReader(extension.download_count_month)} downloads this month`}>
                 {formatNumber(extension.download_count_month)} this month
               </span>
+            </div>
+          )}
+          {showTrendBadge && (
+            <div className="flex items-center justify-center text-[10px] pb-0">
+              {renderTrendBadge()}
             </div>
           )}
           {showUpdateTime && (
