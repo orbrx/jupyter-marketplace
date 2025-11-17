@@ -60,6 +60,7 @@ interface Extension {
   download_count_week: number
   download_count_day: number
   last_updated: string
+  first_published: string | null
   jupyterlab_versions: number[]
   downloads_trend_365d: { week: string; downloads: number }[] | null
   download_trend_30d_pct: number | null
@@ -114,7 +115,7 @@ export default function ExtensionDetailPage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from("extensions")
-        .select("*, jupyterlab_versions, downloads_trend_365d, download_trend_30d_pct, download_trend_direction")
+        .select("*, jupyterlab_versions, downloads_trend_365d, download_trend_30d_pct, download_trend_direction, first_published")
         .eq("name", params.id)
         .single()
 
@@ -419,6 +420,12 @@ export default function ExtensionDetailPage() {
                     <p className="text-sm text-muted-foreground">{formatDate(extension.last_updated)}</p>
                   </div>
                 </div>
+                {extension.first_published && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm font-medium">First Published</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(extension.first_published)}</p>
+                  </div>
+                )}
                 {extension.jupyterlab_versions && extension.jupyterlab_versions.length > 0 && (
                   <div className="mt-4 pt-4 border-t">
                     <p className="text-sm font-medium mb-2">Supported JupyterLab Versions</p>
@@ -509,56 +516,103 @@ export default function ExtensionDetailPage() {
             {/* Download Trend Over Time */}
             <Card>
               <CardHeader>
-                <CardTitle>Download Trend</CardTitle>
+                <CardTitle>Download Trend (Last 52 Weeks)</CardTitle>
               </CardHeader>
               <CardContent>
-                {extension.downloads_trend_365d && extension.downloads_trend_365d.length > 1 ? (
+                {extension.downloads_trend_365d && extension.downloads_trend_365d.length > 0 ? (
                   <div className="space-y-3">
                     <div className="h-32 w-full">
                       <svg viewBox="0 0 100 40" className="w-full h-full">
                         {(() => {
-                          const points = extension.downloads_trend_365d || []
-                          const values = points.map(p => p.downloads)
-                          const min = Math.min(...values)
-                          const max = Math.max(...values)
-                          const range = max - min || 1
-                          const n = points.length
-                          const coords = points.map((p, i) => {
-                            const x = (i / (n - 1)) * 90 + 5 // leave padding for y labels
-                            const y = 35 - ((p.downloads - min) / range) * 25 // top padding and x-axis at ~35
-                            return { x, y }
+                          const rawData = extension.downloads_trend_365d || []
+                          
+                          // Create 53-week array, pad with null on the left for new extensions
+                          const totalWeeks = 53
+                          const dataPoints: Array<number | null> = new Array(totalWeeks).fill(null)
+                          
+                          // Fill in actual data at the END (most recent weeks)
+                          const actualData = rawData.map(d => d.downloads)
+                          const startIndex = totalWeeks - actualData.length
+                          actualData.forEach((value, i) => {
+                            dataPoints[startIndex + i] = value
                           })
-                          const pathD = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x},${c.y}`).join(" ")
-                          const areaD = `${pathD} L95,35 L5,35 Z`
-
-                          const minLabel = min.toLocaleString()
-                          const maxLabel = max.toLocaleString()
+                          
+                          // Get min/max from actual data only
+                          const validData = dataPoints.filter((d): d is number => d !== null)
+                          const max = Math.max(...validData, 1)
+                          const min = Math.min(...validData, 0)  // Use actual minimum to show detail
+                          const range = max - min || 1
+                          
+                          const xStart = 5
+                          const xEnd = 95
+                          const xRange = xEnd - xStart
+                          
+                          // Build path with gaps for null values
+                          let pathD = ''
+                          let inSegment = false
+                          
+                          dataPoints.forEach((downloads, i) => {
+                            const x = xStart + (i / (dataPoints.length - 1)) * xRange
+                            
+                            if (downloads !== null) {
+                              const y = 35 - ((downloads - min) / range) * 25
+                              pathD += inSegment ? ` L${x},${y}` : ` M${x},${y}`
+                              inSegment = true
+                            } else {
+                              inSegment = false
+                            }
+                          })
+                          
+                          // Build area fill only for data segments
+                          let areaD = ''
+                          let currentSegment = ''
+                          let segmentStartX = 0
+                          
+                          dataPoints.forEach((downloads, i) => {
+                            const x = xStart + (i / (dataPoints.length - 1)) * xRange
+                            
+                            if (downloads !== null) {
+                              const y = 35 - ((downloads - min) / range) * 25
+                              if (!currentSegment) {
+                                segmentStartX = x
+                                currentSegment = `M${x},${y}`
+                              } else {
+                                currentSegment += ` L${x},${y}`
+                              }
+                            } else if (currentSegment) {
+                              // Close this segment
+                              const lastX = xStart + ((i - 1) / (dataPoints.length - 1)) * xRange
+                              areaD += ` ${currentSegment} L${lastX},35 L${segmentStartX},35 Z`
+                              currentSegment = ''
+                            }
+                          })
+                          
+                          // Close final segment if exists
+                          if (currentSegment) {
+                            const lastX = xStart + ((dataPoints.length - 1) / (dataPoints.length - 1)) * xRange
+                            areaD += ` ${currentSegment} L${lastX},35 L${segmentStartX},35 Z`
+                          }
 
                           return (
                             <>
-                              {/* Area and line */}
                               <path d={areaD} className="fill-primary/10" />
                               <path d={pathD} className="stroke-primary" fill="none" strokeWidth={1.5} />
-
-                              {/* X axis baseline */}
-                              <line x1={5} y1={35} x2={95} y2={35} className="stroke-muted-foreground/40" strokeWidth={0.3} />
-
-                              {/* Y axis min/max labels */}
+                              <line x1={xStart} y1={35} x2={xEnd} y2={35} className="stroke-muted-foreground/40" strokeWidth={0.3} />
+                              
                               <text x={3} y={35} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
-                                {minLabel}
+                                {min.toLocaleString()}
                               </text>
                               <text x={3} y={12} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
-                                {maxLabel}
+                                {max.toLocaleString()}
                               </text>
-
-                              {/* X axis labels: 12 mo, 6 mo, Now */}
-                              <text x={5} y={38} textAnchor="start" className="fill-muted-foreground" fontSize={3}>
+                              
+                              <text x={xStart} y={38} textAnchor="start" className="fill-muted-foreground" fontSize={3}>
                                 12 mo
                               </text>
                               <text x={50} y={38} textAnchor="middle" className="fill-muted-foreground" fontSize={3}>
                                 6 mo
                               </text>
-                              <text x={95} y={38} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
+                              <text x={xEnd} y={38} textAnchor="end" className="fill-muted-foreground" fontSize={3}>
                                 Now
                               </text>
                             </>
@@ -567,7 +621,7 @@ export default function ExtensionDetailPage() {
                       </svg>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Weekly downloads over the last year. Higher areas indicate more downloads.
+                      Weekly downloads over the last 52 weeks. Higher areas indicate more downloads.
                     </p>
                   </div>
                 ) : (

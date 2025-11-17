@@ -32,6 +32,7 @@ interface Extension {
   download_count_month: number
   download_count_total: number
   last_updated: string
+  first_published?: string | null
   jupyterlab_versions?: number[]
   // Optional fields that we don't fetch initially for performance
   summary?: string | null
@@ -93,7 +94,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     const supabase = createClient()
     let query = supabase
       .from("extensions")
-      .select("id, name, description, summary, author, category, logo_url, github_stars, download_count_month, download_count_total, last_updated, download_trend_30d_pct, download_trend_direction", { count: "exact" })
+      .select("id, name, description, summary, author, category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
       .range(pageIndex * EXTENSIONS_PER_PAGE, (pageIndex + 1) * EXTENSIONS_PER_PAGE - 1)
 
     // Apply category filter on server side
@@ -116,12 +117,12 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     switch (sortBy) {
       case "new_and_rising":
         // For up and coming, we want:
-        // 1. Recently updated extensions (within last 30 days)
+        // 1. Recently published extensions (within last 90 days)
         // 2. Lower download counts and stars (to exclude popular extensions)
         // 3. Actually rising (positive growth trend)
         // 4. Order by growth percentage to show fastest risers first
         query = query
-          .gte('last_updated', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+          .gte('first_published', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
           .lt('download_count_total', 10000) // Exclude very popular extensions
           .lt('github_stars', 100) // Exclude extensions with lots of stars
           .eq('download_trend_direction', 'up') // Must be rising
