@@ -26,7 +26,7 @@ interface Extension {
   name: string
   description: string | null
   author: string | null
-  category: string | null
+  ai_category: string | null
   logo_url?: string | null
   github_stars: number
   download_count_month: number
@@ -94,12 +94,17 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     const supabase = createClient()
     let query = supabase
       .from("extensions")
-      .select("id, name, description, summary, author, category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
+      .select("id, name, description, summary, author, ai_category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
       .range(pageIndex * EXTENSIONS_PER_PAGE, (pageIndex + 1) * EXTENSIONS_PER_PAGE - 1)
 
     // Apply category filter on server side
     if (selectedCategory) {
-      query = query.eq("category", selectedCategory)
+      // Special handling for NULL values (Other category)
+      if (selectedCategory === "__NULL__") {
+        query = query.is("ai_category", null)
+      } else {
+        query = query.eq("ai_category", selectedCategory)
+      }
     }
 
     // Apply search filter on server side

@@ -21,6 +21,7 @@ import { MarketplaceHeader } from "@/components/marketplace-header"
 import { MarketplaceSearch } from "@/components/marketplace-search"
 import { ExtensionGrid } from "@/components/extension-grid"
 import { MarketplaceFilters } from "@/components/marketplace-filters"
+import { CategoryFilter } from "@/components/category-filter"
 import { SkeletonExtensionCard } from "@/components/skeleton-card"
 import { BackToTop } from "@/components/back-to-top"
 
@@ -30,6 +31,7 @@ export default function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<string>("new_and_rising")
   const [selectedVersion, setSelectedVersion] = useState<string>("all")
+  const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const router = useRouter()
   const pathname = usePathname()
@@ -41,8 +43,10 @@ export default function MarketplacePage() {
       const urlSort = searchParams.get("sort")
       const urlQ = searchParams.get("q")
       const urlVersion = searchParams.get("version")
+      const urlCategory = searchParams.get("category")
       const savedSortBy = localStorage.getItem("sortBy")
       const savedVersion = localStorage.getItem("selectedVersion")
+      const savedCategory = localStorage.getItem("selectedCategory")
 
       // Prefer URL params; fall back to localStorage; then defaults
       if (urlSort) setSortBy(urlSort)
@@ -50,6 +54,9 @@ export default function MarketplacePage() {
 
       if (urlVersion) setSelectedVersion(urlVersion)
       else if (savedVersion) setSelectedVersion(savedVersion)
+
+      if (urlCategory) setSelectedCategory(urlCategory)
+      else if (savedCategory) setSelectedCategory(savedCategory)
 
       if (urlQ) setSearchTerm(urlQ)
 
@@ -67,11 +74,12 @@ export default function MarketplacePage() {
   useEffect(() => {
     localStorage.setItem("sortBy", sortBy)
     localStorage.setItem("selectedVersion", selectedVersion)
+    localStorage.setItem("selectedCategory", selectedCategory)
     // Scroll to top when filter changes (but not on initial load)
     if (typeof window !== 'undefined' && !isLoading) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [sortBy, selectedVersion, isLoading])
+  }, [sortBy, selectedVersion, selectedCategory, isLoading])
 
   // Keep URL in sync with current filters (avoid pushing history on every change)
   useEffect(() => {
@@ -80,9 +88,10 @@ export default function MarketplacePage() {
     if (debouncedSearch) params.set("q", debouncedSearch)
     if (sortBy) params.set("sort", sortBy)
     if (selectedVersion) params.set("version", selectedVersion)
+    if (selectedCategory) params.set("category", selectedCategory)
     const qs = params.toString()
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-  }, [debouncedSearch, sortBy, selectedVersion, pathname, router])
+  }, [debouncedSearch, sortBy, selectedVersion, selectedCategory, pathname, router])
 
   if (isLoading) {
     return (
@@ -131,6 +140,16 @@ export default function MarketplacePage() {
         </div>
       </div>
 
+      {/* Category Filter Bar */}
+      <div className="border-b border-border/40 bg-background">
+        <div className="container mx-auto px-4 md:px-6 py-4">
+          <CategoryFilter 
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+      </div>
+
       <main id="main-content" className="container mx-auto px-4 md:px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sticky Filters Sidebar */}
@@ -147,7 +166,7 @@ export default function MarketplacePage() {
           <div className="flex-1">
             <ExtensionGrid 
               searchTerm={debouncedSearch}
-              selectedCategory=""
+              selectedCategory={selectedCategory}
               sortBy={sortBy}
               selectedVersion={selectedVersion}
             />

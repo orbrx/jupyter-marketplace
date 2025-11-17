@@ -15,7 +15,9 @@
  */
 import { Star, Download, Clock, Flag } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { formatRelativeTime } from "@/lib/utils"
+import { getCategoryLabel, getCategoryBadgeColor } from "@/components/category-filter"
 import Link from "next/link"
 import React, { forwardRef } from "react"
 
@@ -24,7 +26,7 @@ interface Extension {
   name: string
   description: string | null
   author: string | null
-  category: string | null
+  ai_category: string | null
   logo_url?: string | null
   github_stars: number
   download_count_month: number
@@ -168,6 +170,10 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
         </div>
         <h3 id={`extension-${extension.id}-title`} className="font-semibold text-base md:text-base single-line-fade w-full leading-tight">{extension.name}</h3>
         <p className="text-xs md:text-xs text-muted-foreground leading-tight single-line-fade w-full font-medium">{extension.author || "Unknown"}</p>
+        {/* Category Badge */}
+        <Badge className={`text-[10px] px-2 py-0.5 ${getCategoryBadgeColor(extension.ai_category)}`}>
+          {getCategoryLabel(extension.ai_category)}
+        </Badge>
       </CardHeader>
 
       <CardContent className="flex-1 pt-1 !px-3 md:!px-3 flex flex-col min-h-0 gap-3">

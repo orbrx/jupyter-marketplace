@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase"
+import { getCategoryLabel, getCategoryBadgeColor } from "@/components/category-filter"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
@@ -48,7 +49,7 @@ interface Extension {
   version: string
   author: string | null
   license: string | null
-  category: string | null
+  ai_category: string | null
   logo_url?: string | null
   pypi_url: string
   github_url: string | null
@@ -169,21 +170,11 @@ export default function ExtensionDetailPage() {
     )
   }
 
-  const getCategoryColor = (category: string | null) => {
-    switch (category) {
-      case "widgets":
-        return "bg-blue-100 text-blue-800"
-      case "visualization":
-        return "bg-purple-100 text-purple-800"
-      case "data-analysis":
-        return "bg-green-100 text-green-800"
-      case "themes":
-        return "bg-pink-100 text-pink-800"
-      case "other":
-        return "bg-yellow-100 text-yellow-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+  const handleCategoryClick = () => {
+    // Navigate to homepage with category filter applied
+    // Use special __NULL__ identifier for null categories (Other)
+    const categoryParam = extension?.ai_category || "__NULL__"
+    router.push(`/?category=${encodeURIComponent(categoryParam)}`)
   }
 
   const formatDate = (dateString: string) => {
@@ -279,11 +270,13 @@ export default function ExtensionDetailPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-4xl md:text-5xl font-bold">{extension.name}</h1>
-              {extension.category && (
-                <Badge className={getCategoryColor(extension.category)}>
-                  {extension.category}
-                </Badge>
-              )}
+              <Badge 
+                className={`cursor-pointer hover:opacity-80 transition-opacity ${getCategoryBadgeColor(extension.ai_category)}`}
+                onClick={handleCategoryClick}
+                title={`View all ${getCategoryLabel(extension.ai_category)} extensions`}
+              >
+                {getCategoryLabel(extension.ai_category)}
+              </Badge>
             </div>
             <p className="text-xl text-muted-foreground mb-4">
               {extension.summary || "No summary available."}
