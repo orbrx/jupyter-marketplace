@@ -526,8 +526,8 @@ export default function ExtensionDetailPage() {
                         {(() => {
                           const rawData = extension.downloads_trend_365d || []
                           
-                          // Create 53-week array, pad with null on the left for new extensions
-                          const totalWeeks = 53
+                          // Create 52-week array, pad with null on the left for new extensions
+                          const totalWeeks = 52
                           const dataPoints: Array<number | null> = new Array(totalWeeks).fill(null)
                           
                           // Fill in actual data at the END (most recent weeks)
