@@ -630,6 +630,33 @@ export default function ExtensionDetailPage() {
               </CardContent>
             </Card>
 
+            {/* Security */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Security</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Security analysis powered by Snyk Advisor
+                  </p>
+                  <a 
+                    href={`https://snyk.io/advisor/python/${extension.name}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <img 
+                      src={`https://snyk.io/advisor/python/${extension.name}/badge.svg`}
+                      alt={`${extension.name} Snyk security score`}
+                      className="max-w-full h-auto"
+                      loading="lazy"
+                    />
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* GitHub Stats */}
             {(extension.github_stars > 0 || extension.github_forks > 0 || extension.github_issues > 0) && (
               <Card>
