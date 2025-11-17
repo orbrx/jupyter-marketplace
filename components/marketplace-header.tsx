@@ -19,7 +19,7 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { Wrench, Menu, X, MessageCircle, Info } from "lucide-react"
+import { Wrench, Menu, X, MessageCircle, Info, BarChart3 } from "lucide-react"
 import { useState } from "react"
 
 export function MarketplaceHeader() {
@@ -48,6 +48,13 @@ export function MarketplaceHeader() {
             </Link>
           </div>
           <div className="flex items-center space-x-3 md:space-x-6">
+            <Link 
+              href="/ecosystem" 
+              className="hidden md:flex items-center text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Ecosystem
+            </Link>
             <Link 
               href="/about" 
               className="hidden md:flex items-center text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -96,6 +103,14 @@ export function MarketplaceHeader() {
         <div id="mobile-menu" className="md:hidden border-t border-border bg-card">
           <div className="container mx-auto px-4 py-3">
             <nav className="flex flex-col space-y-3">
+              <Link 
+                href="/ecosystem" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 flex items-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Ecosystem
+              </Link>
               <Link 
                 href="/about" 
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 flex items-center"
