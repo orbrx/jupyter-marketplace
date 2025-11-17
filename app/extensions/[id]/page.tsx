@@ -516,7 +516,7 @@ export default function ExtensionDetailPage() {
             {/* Download Trend Over Time */}
             <Card>
               <CardHeader>
-                <CardTitle>Download Trend (Last 52 Weeks)</CardTitle>
+                <CardTitle>Download Trend (last year)</CardTitle>
               </CardHeader>
               <CardContent>
                 {extension.downloads_trend_365d && extension.downloads_trend_365d.length > 0 ? (
