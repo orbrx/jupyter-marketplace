@@ -185,6 +185,18 @@ export default function ExtensionDetailPage() {
     })
   }
 
+  const handleBackToMarketplace = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.push("/")
+      // Ensure we scroll to the very top after navigation
+      setTimeout(() => window.scrollTo(0, 0), 100)
+    } else {
+      router.push("/")
+      // Ensure we scroll to the very top after navigation
+      setTimeout(() => window.scrollTo(0, 0), 100)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -215,11 +227,7 @@ export default function ExtensionDetailPage() {
         <div className="container mx-auto px-4 py-6">
           <Button
             variant="ghost"
-            onClick={() => {
-              router.back()
-              // Ensure we scroll to the very top after navigation
-              setTimeout(() => window.scrollTo(0, 0), 100)
-            }}
+            onClick={handleBackToMarketplace}
             className="mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -240,11 +248,7 @@ export default function ExtensionDetailPage() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => {
-            router.back()
-            // Ensure we scroll to the very top after navigation
-            setTimeout(() => window.scrollTo(0, 0), 100)
-          }}
+          onClick={handleBackToMarketplace}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
