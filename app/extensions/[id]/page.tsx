@@ -191,14 +191,22 @@ export default function ExtensionDetailPage() {
 
   const handleBackToMarketplace = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
-      router.push("/")
-      // Ensure we scroll to the very top after navigation
-      setTimeout(() => window.scrollTo(0, 0), 100)
-    } else {
-      router.push("/")
-      // Ensure we scroll to the very top after navigation
-      setTimeout(() => window.scrollTo(0, 0), 100)
+      try {
+        if (
+          document.referrer &&
+          new URL(document.referrer).origin === window.location.origin
+        ) {
+          router.back()
+          return
+        }
+      } catch {
+        // Fall back to the marketplace when the referrer is unavailable or invalid.
+      }
     }
+
+    router.push("/")
+    // Ensure we scroll to the very top after navigation
+    setTimeout(() => window.scrollTo(0, 0), 100)
   }
 
   if (loading) {

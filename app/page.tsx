@@ -76,11 +76,13 @@ export default function MarketplacePage() {
   }, [searchTerm])
 
   useEffect(() => {
+    if (isLoading) return
+
     localStorage.setItem("sortBy", sortBy)
     localStorage.setItem("selectedVersion", selectedVersion)
     localStorage.setItem("selectedCategory", selectedCategory)
-    // Scroll to top when filter changes (but not on initial load)
-    if (typeof window !== 'undefined' && !isLoading) {
+    // Scroll to top when filters change after the initial preferences load.
+    if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [sortBy, selectedVersion, selectedCategory, isLoading])
