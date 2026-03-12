@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
 import { BetaBanner } from '@/components/beta-banner'
+import { UtmTracker } from '@/components/utm-tracker'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -81,6 +83,9 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <Suspense fallback={null}>
+          <UtmTracker />
+        </Suspense>
         <BetaBanner feedbackHref="https://github.com/orbrx/jupyter-marketplace/issues/new/choose" />
         {children}
         <Analytics />

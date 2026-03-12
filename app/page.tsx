@@ -85,13 +85,18 @@ export default function MarketplacePage() {
   useEffect(() => {
     if (!pathname) return
     const params = new URLSearchParams()
+    for (const [key, value] of searchParams.entries()) {
+      if (key.startsWith("utm_")) {
+        params.set(key, value)
+      }
+    }
     if (debouncedSearch) params.set("q", debouncedSearch)
     if (sortBy) params.set("sort", sortBy)
     if (selectedVersion) params.set("version", selectedVersion)
     if (selectedCategory) params.set("category", selectedCategory)
     const qs = params.toString()
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-  }, [debouncedSearch, sortBy, selectedVersion, selectedCategory, pathname, router])
+  }, [debouncedSearch, sortBy, selectedVersion, selectedCategory, pathname, router, searchParams])
 
   if (isLoading) {
     return (
