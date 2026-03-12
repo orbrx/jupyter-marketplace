@@ -34,6 +34,10 @@ interface Extension {
   last_updated: string
   // Optional fields that we don't fetch initially for performance
   summary?: string | null
+  ai_summary?: string | null
+  ai_description?: string | null
+  ai_features?: string[] | null
+  ai_target_users?: string | null
   version?: string
   license?: string | null
   pypi_url?: string
@@ -178,7 +182,7 @@ export const ExtensionCard = forwardRef<HTMLDivElement, ExtensionCardProps>(func
 
       <CardContent className="flex-1 pt-1 !px-3 md:!px-3 flex flex-col min-h-0 gap-3">
         <p className="text-xs md:text-xs text-muted-foreground line-clamp-fade-right-3 text-center leading-snug break-words">
-          {extension.summary || "No summary available."}
+          {extension.ai_summary || extension.summary || "No summary available."}
         </p>
         <div className="space-y-2 mt-auto">
           <div className="flex items-center justify-center space-x-2 md:space-x-1.5 text-xs text-muted-foreground">

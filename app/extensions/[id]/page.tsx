@@ -50,6 +50,10 @@ interface Extension {
   author: string | null
   license: string | null
   ai_category: string | null
+  ai_summary: string | null
+  ai_description: string | null
+  ai_features: string[] | null
+  ai_target_users: string | null
   logo_url?: string | null
   pypi_url: string
   github_url: string | null
@@ -283,7 +287,7 @@ export default function ExtensionDetailPage() {
               </Badge>
             </div>
             <p className="text-xl text-muted-foreground mb-4">
-              {extension.summary || "No summary available."}
+              {extension.ai_summary || extension.summary || "No summary available."}
             </p>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
@@ -341,9 +345,44 @@ export default function ExtensionDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {(extension.ai_description || extension.ai_features || extension.ai_target_users) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {extension.ai_description && (
+                    <p className="text-muted-foreground leading-relaxed">
+                      {extension.ai_description}
+                    </p>
+                  )}
+                  {extension.ai_features && extension.ai_features.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Key Features</h4>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {extension.ai_features.map((feature, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <Check className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {extension.ai_target_users && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-1">Who is this for?</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {extension.ai_target_users}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader>
-                <CardTitle>About</CardTitle>
+                <CardTitle>{extension.ai_description ? "README" : "About"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm dark:prose-invert max-w-none">

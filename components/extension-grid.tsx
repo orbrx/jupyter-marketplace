@@ -36,6 +36,10 @@ interface Extension {
   jupyterlab_versions?: number[]
   // Optional fields that we don't fetch initially for performance
   summary?: string | null
+  ai_summary?: string | null
+  ai_description?: string | null
+  ai_features?: string[] | null
+  ai_target_users?: string | null
   version?: string
   license?: string | null
   pypi_url?: string
@@ -94,7 +98,7 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     const supabase = createClient()
     let query = supabase
       .from("extensions")
-      .select("id, name, description, summary, author, ai_category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
+      .select("id, name, description, summary, ai_summary, author, ai_category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
       .range(pageIndex * EXTENSIONS_PER_PAGE, (pageIndex + 1) * EXTENSIONS_PER_PAGE - 1)
 
     // Apply category filter on server side
