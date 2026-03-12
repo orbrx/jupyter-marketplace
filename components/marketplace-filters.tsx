@@ -21,6 +21,7 @@ interface MarketplaceFiltersProps {
   onSortChange: (sortBy: string) => void
   selectedVersion: string
   onVersionChange: (version: string) => void
+  disableSort?: boolean
 }
 
 export function MarketplaceFilters({ 
@@ -28,6 +29,7 @@ export function MarketplaceFilters({
   onSortChange,
   selectedVersion,
   onVersionChange,
+  disableSort = false,
 }: MarketplaceFiltersProps) {
 
   const sortOptions = [
@@ -85,8 +87,9 @@ export function MarketplaceFilters({
                     checked={sortBy === option.id}
                     onChange={() => onSortChange(option.id)}
                     className="w-5 h-5 lg:w-4 lg:h-4 text-primary"
+                    disabled={disableSort}
                   />
-                  <Label htmlFor={option.id} className="text-base lg:text-sm cursor-pointer">
+                  <Label htmlFor={option.id} className={`text-base lg:text-sm ${disableSort ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
                     {option.label}
                   </Label>
                 </div>

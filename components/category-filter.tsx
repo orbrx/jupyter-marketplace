@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge"
 interface CategoryFilterProps {
   selectedCategory: string
   onCategoryChange: (category: string) => void
+  disabled?: boolean
 }
 
 // Define available categories - these should match the ai_category values in Supabase
@@ -39,7 +40,7 @@ export const CATEGORIES = [
   { id: "__NULL__", label: "Other" },
 ]
 
-export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryFilterProps) {
+export function CategoryFilter({ selectedCategory, onCategoryChange, disabled = false }: CategoryFilterProps) {
   // Helper to get hover class for each category
   const getHoverClass = (categoryId: string) => {
     if (categoryId === "") return "hover:bg-muted/50" // Subtle hover for "All"
@@ -77,12 +78,14 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
             <button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
+              disabled={disabled}
               className={`
                 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap
                 ${isSelected 
                   ? colorClass
                   : `border border-border bg-transparent text-foreground ${hoverClass}`
                 }
+                ${disabled ? "cursor-not-allowed opacity-50" : ""}
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
               `}
               aria-pressed={isSelected}

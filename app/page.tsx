@@ -36,6 +36,11 @@ export default function MarketplacePage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const isSearching = searchTerm.trim().length > 0
+  const hasActiveSearch = debouncedSearch.trim().length > 0
+  const effectiveSortBy = hasActiveSearch ? "" : sortBy
+  const effectiveSelectedVersion = selectedVersion
+  const effectiveSelectedCategory = selectedCategory
 
   // Load preferences once on mount
   useEffect(() => {
@@ -165,15 +170,16 @@ export default function MarketplacePage() {
                 onSortChange={setSortBy}
                 selectedVersion={selectedVersion}
                 onVersionChange={setSelectedVersion}
+                disableSort={isSearching}
               />
             </div>
           </aside>
           <div className="flex-1">
             <ExtensionGrid 
               searchTerm={debouncedSearch}
-              selectedCategory={selectedCategory}
-              sortBy={sortBy}
-              selectedVersion={selectedVersion}
+              selectedCategory={effectiveSelectedCategory}
+              sortBy={effectiveSortBy}
+              selectedVersion={effectiveSelectedVersion}
             />
           </div>
         </div>

@@ -52,6 +52,12 @@ interface Extension {
   download_trend_direction?: "up" | "down" | "stable" | null
 }
 
+interface SearchResult {
+  ext_id: number
+  rank: number
+  total_count: number
+}
+
 interface ExtensionGridProps {
   searchTerm: string
   selectedCategory: string
@@ -60,6 +66,7 @@ interface ExtensionGridProps {
 }
 
 const EXTENSIONS_PER_PAGE = 50
+const EXTENSION_SELECT_FIELDS = "id, name, description, summary, ai_summary, author, ai_category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction"
 
 export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVersion }: ExtensionGridProps) {
   const [extensions, setExtensions] = useState<Extension[]>([])
@@ -96,9 +103,123 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     setLoading(true)
 
     const supabase = createClient()
+    const errorMessageFor = (message: string) => {
+      const isVersionColumnError = message.includes("jupyterlab_versions") || message.includes("column")
+      const isSearchRpcError = message.includes("search_extensions")
+
+      if (isSearchRpcError) {
+        return "Search is not available yet. Please ensure the search database migration has been deployed."
+      }
+
+      if (isVersionColumnError) {
+        return "Database schema mismatch. The jupyterlab_versions column may not exist in your database. Please run the migration or set version filter to 'All Versions'."
+      }
+
+      return "Unable to load extensions. Please try again later."
+    }
+
+    if (searchTerm) {
+      const categoryParam = selectedCategory === "__NULL__" ? "__NULL__" : selectedCategory || null
+      const versionParam = selectedVersion && selectedVersion !== "all"
+        ? parseInt(selectedVersion)
+        : null
+
+      const { data: searchResults, error: searchError } = await supabase.rpc("search_extensions", {
+        query_text: searchTerm,
+        category_filter: categoryParam,
+        version_filter: versionParam,
+        result_limit: EXTENSIONS_PER_PAGE,
+        result_offset: pageIndex * EXTENSIONS_PER_PAGE,
+      })
+
+      if (searchError) {
+        console.error("Error searching extensions:", searchError)
+
+        if (requestId === requestIdRef.current) {
+          setError(errorMessageFor(searchError.message || ""))
+          setLoading(false)
+        }
+        loadingRef.current = false
+        return
+      }
+
+      // Ignore stale responses
+      if (requestId !== requestIdRef.current) {
+        loadingRef.current = false
+        return
+      }
+
+      if (!searchResults || searchResults.length === 0) {
+        if (pageIndex === 0) {
+          setExtensions([])
+          setTotalCount(0)
+          setAnnouncement(`Found 0 extensions matching "${searchTerm}", ranked by relevance`)
+        }
+        setHasMore(false)
+        setLoading(false)
+        loadingRef.current = false
+        return
+      }
+
+      const typedSearchResults = searchResults as SearchResult[]
+      const totalFound = Number(typedSearchResults[0]?.total_count ?? 0)
+      const ids = typedSearchResults.map(result => result.ext_id)
+
+      const { data, error } = await supabase
+        .from("extensions")
+        .select(EXTENSION_SELECT_FIELDS)
+        .in("id", ids)
+
+      if (error) {
+        console.error("Error fetching ranked extensions:", error)
+
+        if (requestId === requestIdRef.current) {
+          setError(errorMessageFor(error.message || ""))
+          setLoading(false)
+        }
+        loadingRef.current = false
+        return
+      }
+
+      // Ignore stale responses
+      if (requestId !== requestIdRef.current) {
+        loadingRef.current = false
+        return
+      }
+
+      const idOrder = new Map(ids.map((id, index) => [id, index]))
+      const sorted = (data || []).sort((a, b) =>
+        (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0)
+      )
+
+      if (pageIndex === 0) {
+        const unique = Array.from(new Map(sorted.map(e => [e.name, e])).values())
+        setExtensions(unique)
+        setTotalCount(totalFound)
+        setAnnouncement(`Found ${totalFound} extension${totalFound !== 1 ? "s" : ""} matching "${searchTerm}", ranked by relevance`)
+      } else {
+        setExtensions(prev => {
+          const byName = new Map<string, Extension>(prev.map(e => [e.name, e]))
+          for (const item of sorted) {
+            byName.set(item.name, item)
+          }
+          return Array.from(byName.values())
+        })
+
+        if (sorted.length > 0) {
+          setAnnouncement(`Loaded ${sorted.length} more search results`)
+        }
+      }
+
+      setHasMore((pageIndex + 1) * EXTENSIONS_PER_PAGE < totalFound)
+      setLoading(false)
+      loadingRef.current = false
+      return
+    }
+
     let query = supabase
       .from("extensions")
-      .select("id, name, description, summary, ai_summary, author, ai_category, logo_url, github_stars, download_count_month, download_count_total, last_updated, first_published, download_trend_30d_pct, download_trend_direction", { count: "exact" })
+      .select(EXTENSION_SELECT_FIELDS, { count: "exact" })
       .range(pageIndex * EXTENSIONS_PER_PAGE, (pageIndex + 1) * EXTENSIONS_PER_PAGE - 1)
 
     // Apply category filter on server side
@@ -111,11 +232,6 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
       }
     }
 
-    // Apply search filter on server side
-    if (searchTerm) {
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%`)
-    }
-
     // Apply JupyterLab version filter on server side
     if (selectedVersion && selectedVersion !== "all") {
       const versionNum = parseInt(selectedVersion)
@@ -123,75 +239,69 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
     }
 
     // Apply sorting on server side (use secondary id order for stable pagination)
-    switch (sortBy) {
-      case "new_and_rising":
-        // For up and coming, we want:
-        // 1. Recently published extensions (within last 90 days)
-        // 2. Lower download counts and stars (to exclude popular extensions)
-        // 3. Actually rising (positive growth trend)
-        // 4. Order by growth percentage to show fastest risers first
-        query = query
-          .gte('first_published', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-          .lt('download_count_total', 10000) // Exclude very popular extensions
-          .lt('github_stars', 100) // Exclude extensions with lots of stars
-          .eq('download_trend_direction', 'up') // Must be rising
-          .order('download_trend_30d_pct', { ascending: false }) // Fastest growers first
-          .order('id', { ascending: true })
-        break
-      case "trending":
-        // Extensions currently trending up, ordered by 30d growth
-        query = query
-          .eq('download_trend_direction', 'up')
-          .order('download_trend_30d_pct', { ascending: false })
-          .order('id', { ascending: true })
-        break
-      case "download_count_month":
-        query = query
-          .order("download_count_month", { ascending: false })
-          .order('id', { ascending: true })
-        break
-      case "download_count_total":
-        query = query
-          .order("download_count_total", { ascending: false })
-          .order('id', { ascending: true })
-        break
-      case "github_stars":
-        query = query
-          .order("github_stars", { ascending: false })
-          .order('id', { ascending: true })
-        break
-      case "last_updated":
-        query = query
-          .order("last_updated", { ascending: false })
-          .order('id', { ascending: true })
-        break
-      case "name":
-        query = query
-          .order("name", { ascending: true })
-          .order('id', { ascending: true })
-        break
-      default:
-        query = query
-          .order("download_count_month", { ascending: false })
-          .order('id', { ascending: true })
+    if (!searchTerm) {
+      switch (sortBy) {
+        case "new_and_rising":
+          // For up and coming, we want:
+          // 1. Recently published extensions (within last 90 days)
+          // 2. Lower download counts and stars (to exclude popular extensions)
+          // 3. Actually rising (positive growth trend)
+          // 4. Order by growth percentage to show fastest risers first
+          query = query
+            .gte('first_published', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+            .lt('download_count_total', 10000) // Exclude very popular extensions
+            .lt('github_stars', 100) // Exclude extensions with lots of stars
+            .eq('download_trend_direction', 'up') // Must be rising
+            .order('download_trend_30d_pct', { ascending: false }) // Fastest growers first
+            .order('id', { ascending: true })
+          break
+        case "trending":
+          // Extensions currently trending up, ordered by 30d growth
+          query = query
+            .eq('download_trend_direction', 'up')
+            .order('download_trend_30d_pct', { ascending: false })
+            .order('id', { ascending: true })
+          break
+        case "download_count_month":
+          query = query
+            .order("download_count_month", { ascending: false })
+            .order('id', { ascending: true })
+          break
+        case "download_count_total":
+          query = query
+            .order("download_count_total", { ascending: false })
+            .order('id', { ascending: true })
+          break
+        case "github_stars":
+          query = query
+            .order("github_stars", { ascending: false })
+            .order('id', { ascending: true })
+          break
+        case "last_updated":
+          query = query
+            .order("last_updated", { ascending: false })
+            .order('id', { ascending: true })
+          break
+        case "name":
+          query = query
+            .order("name", { ascending: true })
+            .order('id', { ascending: true })
+          break
+        default:
+          query = query
+            .order("download_count_month", { ascending: false })
+            .order('id', { ascending: true })
+      }
     }
 
     const { data, error, count } = await query
 
     if (error) {
       console.error("Error fetching extensions:", error)
-      
-      // Check if error is related to jupyterlab_versions column
-      const errorMessage = error.message || ''
-      const isVersionColumnError = errorMessage.includes('jupyterlab_versions') || errorMessage.includes('column')
-      
+
       // On error, only clear loading if this response is current
       if (requestId === requestIdRef.current) {
-        if (isVersionColumnError) {
-          setError("Database schema mismatch. The jupyterlab_versions column may not exist in your database. Please run the migration or set version filter to 'All Versions'.")
-        } else {
-          setError("Unable to load extensions. Please try again later.")
-        }
+        setError(errorMessageFor(error.message || ""))
         setLoading(false)
       }
       loadingRef.current = false
