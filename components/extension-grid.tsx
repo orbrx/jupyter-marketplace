@@ -409,14 +409,21 @@ export function ExtensionGrid({ searchTerm, selectedCategory, sortBy, selectedVe
         {loading ? (
           <div className="h-7 md:h-6 w-60 md:w-52 bg-muted rounded skeleton-pulse" />
         ) : (
-          <h2 
-            className="text-xl md:text-lg font-semibold"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {totalCount} Extension{totalCount !== 1 ? 's' : ''}
-            {searchTerm && ` matching "${searchTerm}"`}
-          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 
+              className="text-xl md:text-lg font-semibold"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {totalCount} Extension{totalCount !== 1 ? 's' : ''}
+              {searchTerm && ` matching "${searchTerm}"`}
+            </h2>
+            {searchTerm && (
+              <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                Ranked by relevance
+              </span>
+            )}
+          </div>
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">

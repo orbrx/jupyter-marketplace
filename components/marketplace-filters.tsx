@@ -21,7 +21,7 @@ interface MarketplaceFiltersProps {
   onSortChange: (sortBy: string) => void
   selectedVersion: string
   onVersionChange: (version: string) => void
-  disableSort?: boolean
+  searchMode?: boolean
 }
 
 export function MarketplaceFilters({ 
@@ -29,7 +29,7 @@ export function MarketplaceFilters({
   onSortChange,
   selectedVersion,
   onVersionChange,
-  disableSort = false,
+  searchMode = false,
 }: MarketplaceFiltersProps) {
 
   const sortOptions = [
@@ -78,22 +78,42 @@ export function MarketplaceFilters({
           <CardContent className="space-y-4 lg:space-y-3 pt-6">
             <fieldset>
               <legend className="text-base font-medium lg:text-sm mb-4 lg:mb-3">Sort By</legend>
-              {sortOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-3 mb-4 lg:mb-3 last:mb-0">
-                  <input
-                    type="radio"
-                    id={option.id}
-                    name="sort"
-                    checked={sortBy === option.id}
-                    onChange={() => onSortChange(option.id)}
-                    className="w-5 h-5 lg:w-4 lg:h-4 text-primary"
-                    disabled={disableSort}
-                  />
-                  <Label htmlFor={option.id} className={`text-base lg:text-sm ${disableSort ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
-                    {option.label}
-                  </Label>
+              {searchMode ? (
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="search-relevance"
+                      name="sort"
+                      checked
+                      readOnly
+                      className="w-5 h-5 lg:w-4 lg:h-4 text-primary"
+                    />
+                    <Label htmlFor="search-relevance" className="text-base lg:text-sm">
+                      Relevance
+                    </Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground lg:text-xs">
+                    Search results are ranked by relevance.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                sortOptions.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-3 mb-4 lg:mb-3 last:mb-0">
+                    <input
+                      type="radio"
+                      id={option.id}
+                      name="sort"
+                      checked={sortBy === option.id}
+                      onChange={() => onSortChange(option.id)}
+                      className="w-5 h-5 lg:w-4 lg:h-4 text-primary"
+                    />
+                    <Label htmlFor={option.id} className="text-base lg:text-sm cursor-pointer">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))
+              )}
             </fieldset>
           </CardContent>
         </Card>

@@ -36,7 +36,6 @@ export default function MarketplacePage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const isSearching = searchTerm.trim().length > 0
   const hasActiveSearch = debouncedSearch.trim().length > 0
   const effectiveSortBy = hasActiveSearch ? "" : sortBy
   const effectiveSelectedVersion = selectedVersion
@@ -170,7 +169,7 @@ export default function MarketplacePage() {
                 onSortChange={setSortBy}
                 selectedVersion={selectedVersion}
                 onVersionChange={setSelectedVersion}
-                disableSort={isSearching}
+                searchMode={hasActiveSearch}
               />
             </div>
           </aside>
